@@ -5,13 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Plataforma de Acesso</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        /* Estilo para a transição suave do carrossel */
-        .carousel-image {
-            transition: opacity 1s ease-in-out;
-        }
-    </style>
+    <link href="./dist/output.css" rel="stylesheet">
+    <link href="style.css" rel="stylesheet">
 </head>
 
 <body class="bg-gray-50">
@@ -22,8 +17,8 @@
 
                 <div class="p-8 md:p-12 flex flex-col justify-center">
                     <div class="flex justify-start mb-8 space-x-6">
-                        <img src="igutlogo.png" alt="Logo iGUT" class="h-50 object-contain">
-                        <img src="ebalogo.png" alt="Logo eBA" class="h-50 object-contain">
+                        <img src="assets/igutlogo.png" alt="Logo iGUT" class="h-12 object-contain">
+                        <img src="assets/ebalogo.png" alt="Logo eBA" class="h-12 object-contain">
                     </div>
                     <h1 class="text-3xl font-bold text-gray-800 mb-2">Acesso ao Sistema</h1>
                     <p class="text-gray-500 mb-8">Bem-vindo(a) de volta! Faça login na sua conta.</p>
@@ -62,9 +57,9 @@
 
                 <div class="hidden md:block relative">
                     <div id="image-carousel" class="w-full h-full">
-                        <img src="imagem1.jpg" class="carousel-image absolute w-full h-full object-cover opacity-0" alt="Médica usando um tablet">
-                        <img src="imagem2.jpg" class="carousel-image absolute w-full h-full object-cover opacity-0" alt="Médico sorrindo com um estetoscópio">
-                        <img src="imagem3.jpg" class="carousel-image absolute w-full h-full object-cover opacity-0" alt="Equipe médica em uma reunião">
+                        <img src="assets/imagem1.jpg" class="carousel-image absolute w-full h-full object-cover opacity-0" alt="Médica usando um tablet">
+                        <img src="assets/imagem2.jpg" class="carousel-image absolute w-full h-full object-cover opacity-0" alt="Médico sorrindo com um estetoscópio">
+                        <img src="assets/imagem3.jpg" class="carousel-image absolute w-full h-full object-cover opacity-0" alt="Equipe médica em uma reunião">
                     </div>
                     <div class="absolute inset-0 bg-blue-900 bg-opacity-20"></div>
                 </div>
@@ -96,122 +91,6 @@
         </div>
     </div>
 
-    <script>
-        // --- INICIALIZAÇÃO E EVENTOS ---
-        document.addEventListener('DOMContentLoaded', function() {
-            // Lógica do Carrossel
-            const images = document.querySelectorAll('.carousel-image');
-            if (images.length > 0) {
-                let currentImageIndex = 0;
-                images[currentImageIndex].classList.replace('opacity-0', 'opacity-100');
-                setInterval(() => {
-                    images[currentImageIndex].classList.replace('opacity-100', 'opacity-0');
-                    currentImageIndex = (currentImageIndex + 1) % images.length;
-                    images[currentImageIndex].classList.replace('opacity-0', 'opacity-100');
-                }, 5000);
-            }
-
-            // Lógica do Formulário
-            const loginForm = document.getElementById('loginForm');
-            loginForm.addEventListener('submit', function(event) {
-                event.preventDefault();
-                enviarDados();
-            });
-
-            // Lógica para Fechar o Modal
-            const modal = document.getElementById('tokenModal');
-            const closeModalButton = document.getElementById('closeModalButton');
-            closeModalButton.addEventListener('click', () => modal.classList.add('hidden'));
-            modal.addEventListener('click', (event) => {
-                if (event.target === modal) {
-                    modal.classList.add('hidden');
-                }
-            });
-        });
-        // Lógica para Copiar o Token
-        document.getElementById('copyTokenButton').addEventListener('click', () => {
-            const token = document.getElementById('tokenDisplay').textContent;
-            navigator.clipboard.writeText(token).then(() => {
-                const copyIcon = document.getElementById('copyIcon');
-                const checkIcon = document.getElementById('checkIcon');
-                copyIcon.classList.add('hidden');
-                checkIcon.classList.remove('hidden');
-                setTimeout(() => {
-                    copyIcon.classList.remove('hidden');
-                    checkIcon.classList.add('hidden');
-                }, 2000);
-            }).catch(err => {
-                console.error('Falha ao copiar: ', err);
-            });
-        });
-        // --- LÓGICA DE ENVIO DO FORMULÁRIO ---
-        async function enviarDados() {
-            const submitButton = document.getElementById('submitButton');
-            const buttonText = submitButton.querySelector('.button-text');
-            const buttonSpinner = submitButton.querySelector('.button-spinner');
-
-            // 1. Coletar dados e validar
-            const sistema = document.getElementById('sistema').value;
-            const clinica = document.getElementById('nomeClinica').value.trim();
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-
-            if (sistema === 'selecione' || !clinica || !username || !password) {
-                alert('Por favor, preencha todos os campos.');
-                return;
-            }
-
-            // Ativar estado de carregamento do botão
-            submitButton.disabled = true;
-            buttonText.classList.add('hidden');
-            buttonSpinner.classList.remove('hidden');
-
-            // 2. Preparar dados para a API
-            const clientToken = btoa(clinica);
-            const apiUrl = sistema === 'igut' ? 'https://api.igut.med.br/v2/usuarios/login' : 'https://api.eba.med.br/v3/usuarios/login';
-
-            // 3. Enviar requisição com Fetch
-            try {
-                const response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'client_token': clientToken,
-                    },
-                    body: JSON.stringify({ username, password }),
-                });
-
-                const data = await response.json();
-
-                if (response.ok) {
-                    const token = data.data.token;
-                    showTokenModal(token);
-                } else {
-                    const errorMessage = data.message || `Erro ${response.status}`;
-                    alert('Erro ao fazer login: ' + errorMessage);
-                }
-            } catch (error) {
-                alert('Não foi possível comunicar com o servidor. Verifique sua conexão.');
-                console.error('Erro de rede ou de script:', error);
-            } finally {
-                // Desativar estado de carregamento do botão
-                submitButton.disabled = false;
-                buttonText.classList.remove('hidden');
-                buttonSpinner.classList.add('hidden');
-            }
-        }
-
-        // --- FUNÇÃO PARA MOSTRAR O MODAL ---
-        function showTokenModal(token) {
-            const modal = document.getElementById('tokenModal');
-            const tokenDisplay = document.getElementById('tokenDisplay');
-            if (token) {
-                tokenDisplay.textContent = token;
-                modal.classList.remove('hidden');
-            } else {
-                alert('Erro: Token não encontrado na resposta do servidor.');
-            }
-        }
-    </script>
+    <script src="script.js" defer></script>
 </body>
 </html>

@@ -1,0 +1,4 @@
+/* Estilo para a transição suave do carrossel */
+.carousel-image {
+    transition: opacity 1s ease-in-out;
+}
